@@ -40,45 +40,54 @@ public class AutoTweet {
 //    static String ConsumerSecret = "MTFmshrvsc4Uiru9cKC5ldFXIMHD9n7HMnMBdgSWDBOlbvFkJB";
 
     public static void main(String[] args) {
+        do {
+            try {
+                getPost();
+            } catch (TwitterException | InterruptedException ex) {
+                Logger.getLogger(AutoTweet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                Thread.sleep(3600000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AutoTweet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } while (true);
+    }
+
+    public static void getPost() throws TwitterException, InterruptedException {
         Random r = new Random();
-         AccountControler accountControler = new AccountControler();
+        AccountControler accountControler = new AccountControler();
         List<Account> lstAccounts = accountControler.getAll();
-        try {
-            TweetLinkController controller = new TweetLinkController();
-            while (true) {
-                List<LinkPin> linkTweets = controller.getLinkTweet();
-                for (LinkPin linkTweet : linkTweets) {
-                    Account get = lstAccounts.get(r.nextInt(2));
-                    ConfigurationBuilder cb = new ConfigurationBuilder();
-                    cb.setDebugEnabled(true)
-                            .setOAuthConsumerKey(get.ConsumerKey)
-                            .setOAuthConsumerSecret(get.ConsumerSecret)
-                            .setOAuthAccessToken(get.AccessToken)
-                            .setOAuthAccessTokenSecret(get.AccessSecret);
-                    TwitterFactory tf = new TwitterFactory(cb.build());
-                    Twitter twitter = tf.getInstance();
-                    String status = "Where can you buy lovely t-shirt?\n"
-                            + "\n"
-                            + "New Design - Cheap - Sport - Dynamic - Youthful\n"
-                            + "\n"
-                            + "Welcome to T-shirts Shop ^^ \n" + linkTweet.getLink();
+        TweetLinkController controller = new TweetLinkController();
+        while (true) {
+            List<LinkPin> linkTweets = controller.getLinkTweet();
+            for (LinkPin linkTweet : linkTweets) {
+                Account get = lstAccounts.get(r.nextInt(3));
+                ConfigurationBuilder cb = new ConfigurationBuilder();
+                cb.setDebugEnabled(true)
+                        .setOAuthConsumerKey(get.ConsumerKey)
+                        .setOAuthConsumerSecret(get.ConsumerSecret)
+                        .setOAuthAccessToken(get.AccessToken)
+                        .setOAuthAccessTokenSecret(get.AccessSecret);
+                TwitterFactory tf = new TwitterFactory(cb.build());
+                Twitter twitter = tf.getInstance();
+                String status = "Where can you buy lovely t-shirt?\n"
+                        + "\n"
+                        + "New Design - Cheap - Sport - Dynamic - Youthful\n"
+                        + "\n"
+                        + "Welcome to T-shirts Shop ^^ \n" + linkTweet.getLink();
 //                    if (status.split(" ").length > 140) {
 //                        status = status.substring(0, 140);
 //                    }
-                    StatusUpdate statusUpdate = new StatusUpdate(status);
-                    FileControler.getImg(linkTweet.getImg());
-                    statusUpdate.setMedia(new File("tmp.jpg"));
-                    twitter.updateStatus(statusUpdate);
-                    controller.updateLinkTweet(linkTweet.getId());
-                    System.out.println(linkTweet.getNote());
-                    Thread.sleep(((long) (Math.random() * (200000 - 100000)) + 100000));
-                }
-
+                StatusUpdate statusUpdate = new StatusUpdate(status);
+                FileControler.getImg(linkTweet.getImg());
+                statusUpdate.setMedia(new File("tmp.jpg"));
+                twitter.updateStatus(statusUpdate);
+                controller.updateLinkTweet(linkTweet.getId());
+                System.out.println(linkTweet.getNote());
+                Thread.sleep(((long) (Math.random() * (200000 - 100000)) + 100000));
             }
-        } catch (IllegalStateException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException | TwitterException ex) {
-            Logger.getLogger(AutoTweet.class.getName()).log(Level.SEVERE, null, ex);
+
         }
     }
 }
